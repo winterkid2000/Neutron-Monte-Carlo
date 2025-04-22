@@ -1,0 +1,50 @@
+#include <iostream>
+#include <random>
+
+int main() {
+    const int INITIAL_NEUTRONS = 10000;
+    const int GENERATIONS = 10;
+
+    // 핵분열 확률 (열중성자 기준)
+    double fission_prob_U233 = 531.0 / 550.0;
+    double fission_prob_U235 = 585.0 / 690.0;
+
+    // 핵분열당 생성 중성자 수
+    double neutrons_per_fission_U233 = 2.49;
+    double neutrons_per_fission_U235 = 2.43;
+
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<> dis(0.0, 1.0);
+
+    // 시뮬레이션 대상 선택
+    std::string isotope = "U233"; // "U233" 또는 "U235"
+
+    double fission_prob = (isotope == "U233") ? fission_prob_U233 : fission_prob_U235;
+    double neutrons_per_fission = (isotope == "U233") ? neutrons_per_fission_U233 : neutrons_per_fission_U235;
+
+    double current_neutrons = INITIAL_NEUTRONS;
+
+    std::cout << "시뮬레이션 시작: " << isotope << " 핵종 사용\n";
+    for (int gen = 1; gen <= GENERATIONS; ++gen) {
+        int fission_count = 0;
+
+        for (int i = 0; i < current_neutrons; ++i) {
+            if (dis(gen) < fission_prob) {
+                fission_count++;
+            }
+        }
+
+        double next_neutrons = fission_count * neutrons_per_fission;
+        double keff = next_neutrons / current_neutrons;
+
+        std::cout << "세대 " << gen
+                  << ": 핵분열 " << fission_count
+                  << ", 다음 중성자 수 = " << (int)next_neutrons
+                  << ", keff = " << keff << "\n";
+
+        current_neutrons = next_neutrons;
+    }
+
+    return 0;
+}
